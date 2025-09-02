@@ -1,0 +1,1 @@
+const Materia = require("../model/Materia");
