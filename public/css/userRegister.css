@@ -31,11 +31,10 @@ body {
 
 .floating-logo {
     position: absolute;
-    width: 40px; /* ajusta al tamaño de la imagen */
-    height: 40px; /* ajusta al tamaño de la imagen */
-    opacity: 0.8; /* opcional, puedes modificar */
+    width: 40px;
+    height: 40px;
+    opacity: 0.8;
     animation: floatLogo 8s ease-in-out infinite;
-    /* Si quieres que rote con la animación, deja transform en keyframes */
 }
 
 .logo-1 {
@@ -434,7 +433,6 @@ body {
   }
 }
 
-/* Success state (opcional para cuando se corrigen los errores) */
 .register-field.success .field-form {
   border-color: #2ed573;
   background: rgba(46, 213, 115, 0.08);

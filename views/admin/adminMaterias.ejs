@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Materias</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/headerAdmin.css">
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="stylesheet" href="/css/adminMaterias.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.css">
+</head>
+
+<body>
+    <div class="layout">
+        <!-- Header -->
+        <header class="header">
+            <%- include('../layouts/headerAdmin') %>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <%- include('../layouts/sidebar') %>
+        </aside>
+
+        <!-- Contenido -->
+        <main class="content">
+            <!-- Encabezado de página -->
+            <div class="page-header">
+                <h1 class="page-title">Gestión de Materias</h1>
+                <button class="btn btn-primary" onclick="showAddMateriaModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    Nueva Materia
+                </button>
+            </div>
+
+            <!-- Mensaje de estado (oculto por defecto) -->
+            <div id="message" class="message message-success hidden">
+                Operación realizada exitosamente
+            </div>
+
+            <!-- Tabla de usuarios -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title">Lista de Materias</h3>
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" />
+                                <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" />
+                            </svg>
+                            <input type="text" id="searchInput" class="search-input" placeholder="Buscar materias...">
+                            <button id="clearSearch" class="clear-search hidden">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="materias-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre de Materia</th>
+                                <th>Créditos</th>
+                                <th>Semestre</th>
+                                <th>Horarios</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="materiasTableBody">
+                            <% materias.forEach(materia=> { %>
+                                <tr>
+                                    <td>
+                                        <%= materia.nombre %>
+                                    </td>
+                                    <td>
+                                        <%= materia.creditos %>
+                                    </td>
+                                    <td>
+                                        <%= materia.semestre %>
+                                    </td>
+                                    <td>
+                                        <% if (typeof materia.horarios==='string' ) { %>
+                                            <%= materia.horarios %>
+                                                <% } else if (Array.isArray(materia.horarios)) { %>
+                                                    <% materia.horarios.forEach((horario)=> { %>
+                                                        • <%= horario.dia %>
+                                                            <%= horario.horaInicio %>-<%= horario.horaFin %> <br>
+                                                                    <% }) %>
+                                                                        <% } %>
+                                    </td>
+
+                                    <td>
+                                        <div class="table-actions">
+                                            <button class="btn btn-secondary btn-sm"
+                                                onclick="showEditMateriaModal('<%= materia._id %>')">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path
+                                                        d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                                Editar
+                                            </button>
+                                            <button class="btn btn-danger btn-sm"
+                                                onclick="showDeleteConfirmModal('<%= materia._id %>','<%= materia.nombre %>')">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <polyline points="3,6 5,6 21,6" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path
+                                                        d="M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                                Eliminar
+                                            </button>
+                                            <button class="btn btn-info btn-sm"
+                                                onclick="showPreviasModal('<%= materia._id %>', '<%= materia.nombre %>')">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M9 11H15M9 15H15M17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3H12.5858C12.851 3 13.1054 3.10536 13.2929 3.29289L19.7071 9.70711C19.8946 9.89464 20 10.149 20 10.4142V19C20 20.1046 19.1046 21 17 21Z"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                                Previas
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    <p class="pagination-text">
+                        Mostrando <%= ((pagination.currentPage - 1) * pagination.limit) + 1 %>
+                            a <%= Math.min(pagination.currentPage * pagination.limit, pagination.totalMaterias) %>
+                                de <%= pagination.totalMaterias %> materias
+                    </p>
+                </div>
+
+                <div class="pagination">
+                    <% if (pagination.hasPrev) { %>
+                        <button class="pagination-btn" onclick="goToPage(<%= pagination.currentPage - 1 %>)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            Anterior
+                        </button>
+                        <% } %>
+
+                            <div class="pagination-numbers">
+                                <% let startPage=Math.max(1, pagination.currentPage - 2); let
+                                    endPage=Math.min(pagination.totalPages, pagination.currentPage + 2); if (startPage>
+                                    1) { %>
+                                    <button class="pagination-number" onclick="goToPage(1)">1</button>
+                                    <% if (startPage> 2) { %>
+                                        <span class="pagination-ellipsis">...</span>
+                                        <% } %>
+                                            <% } for (let i=startPage; i <=endPage; i++) { %>
+                                                <button
+                                                    class="pagination-number <%= i === pagination.currentPage ? 'active' : '' %>"
+                                                    onclick="goToPage(<%= i %>)">
+                                                    <%= i %>
+                                                </button>
+                                                <% } if (endPage < pagination.totalPages) { %>
+                                                    <% if (endPage < pagination.totalPages - 1) { %>
+                                                        <span class="pagination-ellipsis">...</span>
+                                                        <% } %>
+                                                            <button class="pagination-number"
+                                                                onclick="goToPage(<%= pagination.totalPages %>)">
+                                                                <%= pagination.totalPages %>
+                                                            </button>
+                                                            <% } %>
+                            </div>
+
+                            <% if (pagination.hasNext) { %>
+                                <button class="pagination-btn" onclick="goToPage(<%= pagination.currentPage + 1 %>)">
+                                    Siguiente
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </button>
+                                <% } %>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Agregar/Editar Materia -->
+    <div id="materiaModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="materiaModalTitle">Agregar Nueva Materia</h2>
+                <button class="modal-close" onclick="closeMateriaModal()">&times;</button>
+            </div>
+            <form id="materiaForm">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="nombre">Nombre de Materia</label>
+                            <input type="text" id="nombre" name="nombre" class="form-input" required>
+                            <span class="gentle-error" id="nombreError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="creditos">Créditos</label>
+                            <input type="number" id="creditos" name="creditos" class="form-input" required>
+                            <span class="gentle-error" id="creditosError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="semestre">Semestre</label>
+                            <select id="semestre" name="semestre" class="form-input" required>
+                                <option value="">Seleccionar semestre</option>
+                                <option value="Semestre 1">1° Semestre</option>
+                                <option value="Semestre 2">2° Semestre</option>
+                                <option value="Semestre 3">3° Semestre</option>
+                                <option value="Semestre 4">4° Semestre</option>
+                                <option value="Semestre 5">5° Semestre</option>
+                                <option value="Semestre 6">6° Semestre</option>
+                            </select>
+                            <span class="gentle-error" id="semestreError"></span>
+                        </div>
+                        <div class="form-group form-group-full-width">
+                            <label class="form-label">Horarios</label>
+                            <div class="schedule-container">
+                                <div id="scheduleList" class="schedule-list">
+                                    <div class="schedule-input-group">
+                                        <select id="horarios" class="form-input schedule-day" name="dia[]" required>
+                                            <option value="">Seleccionar día</option>
+                                            <option value="Lunes">Lunes</option>
+                                            <option value="Martes">Martes</option>
+                                            <option value="Miércoles">Miércoles</option>
+                                            <option value="Jueves">Jueves</option>
+                                            <option value="Viernes">Viernes</option>
+                                            <option value="Sábado">Sábado</option>
+                                        </select>
+                                        <input type="time" class="form-input schedule-time" name="horaInicio[]"
+                                            required>
+                                        <span class="schedule-connector">a</span>
+                                        <input type="time" class="form-input schedule-time" name="horaFin[]" required>
+                                        <button type="button" class="remove-schedule-btn hidden" onclick="removeSchedule(this)">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="button" class="add-schedule-btn" onclick="addSchedule()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" />
+                                    </svg>
+                                    Agregar horario
+                                </button>
+                            </div>
+                            <span class="gentle-error" id="horariosError"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeMateriaModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success" id="materiaSubmitBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Guardar Materia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editMateriaModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Editar Materia</h2>
+                <button class="modal-close" onclick="closeEditMateriaModal()">&times;</button>
+            </div>
+            <form id="editMateriaForm">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="edit_nombre">Nombre de Materia</label>
+                            <input type="text" id="edit_nombre" name="edit_nombre" class="form-input" required>
+                            <span class="gentle-error" id="edit_nombreError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="edit_creditos">Créditos</label>
+                            <input type="number" id="edit_creditos" name="edit_creditos" class="form-input" required>
+                            <span class="gentle-error" id="edit_creditosError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="edit_semestre">Semestre</label>
+                            <select id="edit_semestre" name="edit_semestre" class="form-input" required>
+                                <option value="">Seleccionar semestre</option>
+                                <option value="Semestre 1">1° Semestre</option>
+                                <option value="Semestre 2">2° Semestre</option>
+                                <option value="Semestre 3">3° Semestre</option>
+                                <option value="Semestre 4">4° Semestre</option>
+                                <option value="Semestre 5">5° Semestre</option>
+                                <option value="Semestre 6">6° Semestre</option>
+                            </select>
+                            <span class="gentle-error" id="edit_semestreError"></span>
+                        </div>
+                        <div class="form-group form-group-full-width">
+                            <label class="form-label">Horarios</label>
+                            <div class="schedule-container">
+                                <div id="editScheduleList" class="schedule-list">
+                                    <!-- Los horarios se cargarán dinámicamente -->
+                                </div>
+                                <button type="button" class="add-schedule-btn" onclick="addSchedule('edit')">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" />
+                                    </svg>
+                                    Agregar horario
+                                </button>
+                            </div>
+                            <span class="gentle-error" id="edit_horariosError"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditMateriaModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success" id="editMateriaSubmitBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Actualizar Materia
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Confirmar Eliminación -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal confirmation-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirmar Eliminación</h2>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="confirmation-text">
+                    ¿Está seguro de que desea eliminar la materia
+                    <span class="confirmation-materia" id="deleteMateriaName"></span>?
+                </p>
+                <p class="confirmation-text confirmation-text-secondary">
+                    Esta acción no se puede deshacer.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path
+                            d="M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Eliminar Materia
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="previasModal" class="modal-overlay">
+        <div class="modal previas-modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="previasModalTitle">Previas de Materia</h2>
+                <button class="modal-close" onclick="closePreviasModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Lista de previas actuales -->
+                <div class="previas-section">
+                    <h3 class="previas-section-title">Previas actuales</h3>
+                    <div id="previasActualesList" class="previas-list">
+                        <!-- Las previas se cargarán dinámicamente aquí -->
+                        <div class="no-previas">
+                            No hay previas configuradas
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Separador -->
+                <hr class="section-separator">
+
+                <!-- Agregar nueva previa -->
+                <div class="add-previa-section">
+                    <h3 class="previas-section-title">Agregar nueva previa</h3>
+                    <div class="form-grid previas-form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="selectMateriaPrevias">Materia previa</label>
+                            <select id="selectMateriaPrevias" class="form-input">
+                                <option value="">Seleccionar materia...</option>
+                                <!-- Las opciones se cargarán dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="selectRequisito">Requisito</label>
+                            <select id="selectRequisito" class="form-input">
+                                <option value="">Seleccionar requisito...</option>
+                                <option value="aprobada">Materia Aprobada</option>
+                                <option value="examen">Examen</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-success btn-add-previa" onclick="agregarPrevia()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.js"></script>
+    <script src="/js/adminMaterias.js"></script>
+    <script src="/js/sidebar.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Historial Académico</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/estudianteMatriculacion.css">
+    <link rel="stylesheet" href="/css/headerEstudiante.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+</head>
+
+<body>
+    <div class="layout">
+        <!-- Header -->
+        <header class="header">
+            <%- include('../layouts/headerEstudiante') %>
+        </header>
+
+        <div class="navbar-container">
+            <%- include('../layouts/navbar') %>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="main-container">
+            <video controls width="640">
+                <source src="/videos/matriculacion.mp4" type="video/mp4">
+                Tu navegador no soporta la etiqueta de video.
+            </video>
+        </div>
+        <script src="/js/navbar.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/headerEstudiante.js"></script>
+</body>
+
+</html>

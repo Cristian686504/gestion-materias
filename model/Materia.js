@@ -1,33 +1,47 @@
 const mongoose = require('mongoose');
-const Materia = require('./Materia');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
+const Previa = require("./Previa");
 
 const materiaSchema = new mongoose.Schema({
-    codigo:{
+    codigo: {
         type: Number,
-        required: true
+        unique: true
     },    
-    nombre:{
+    nombre: {
         type: String,
         required: true
     },   
     creditos: {
         type: Number,
-        required:true
+        required: true
     },
     semestre: {
         type: String,
-        required:true
+        required: true
     },
-    horarios:{
-        type: String,
-        required:true
-        },
-    previas: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'materia',
-        required: false
+    horarios: [{
+        dia: String,
+        horaInicio: String,
+        horaFin: String
     }]
 });
+
+// Activamos el autoincremento sobre "codigo"
+materiaSchema.plugin(AutoIncrement, { inc_field: 'codigo' });
+// Reiniciar el contador a 1: await mongoose.connection.collection('counters').deleteOne({ _id: 'materia_codigo' });
+
+// Middleware para eliminar cursa asociados al usuario
+materiaSchema.pre("findOneAndDelete", async function (next) {
+  const materiaId = this.getQuery()["_id"];
+  await Previa.deleteMany({
+    $or: [
+      { materiaBase: materiaId },
+      { materiaPrevia: materiaId }
+    ]
+  });
+  next();
+});
+
 const Materia = mongoose.model('materia', materiaSchema);
 
 module.exports = Materia;

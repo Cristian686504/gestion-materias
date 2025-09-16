@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Materias</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/estudianteMaterias.css">
+    <link rel="stylesheet" href="/css/headerEstudiante.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+</head>
+
+<body>
+    <div class="layout">
+        <!-- Header -->
+        <header class="header">
+            <%- include('../layouts/headerEstudiante') %>
+        </header>
+        <div class="navbar-container">
+            <%- include('../layouts/navbar') %>
+        </div>
+
+        <!-- Contenido -->
+        <div class="main-container">
+            <!-- Nueva sección superior que contiene el grafo y el panel -->
+            <div class="top-section">
+                <div class="left-section">
+                    <!-- Contenedor del grafo -->
+                    <div class="leyenda-container">
+                        <div class="leyenda"> <img src="/img/flecha-aprobada.png" alt="Flecha de examen" width="50"
+                                height="30"> Materia aprobada</div>
+                        <div class="leyenda"> <img src="/img/flecha-examen.png" alt="Flecha de examen" width="50"
+                                height="30"> Materia en examen</div>
+                    </div>
+
+                    <div class="graph-container">
+                        <div id="cy"></div>
+                        <div id="info-panel" class="info-panel">
+                            <div class="panel-header">
+                                <h3>Información de Materia</h3>
+                            </div>
+                            <div id="panel-content" class="panel-content">
+                                <p style="color: #666; text-align: center; margin-top: 50px;">
+                                    <em>Haz clic en una materia para ver su información</em>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- Tabla de horarios ahora ocupa todo el ancho inferior -->
+            <div class="schedule-container">
+                <div class="schedule-header">
+                    <h3>Mi Horario</h3>
+                </div>
+                <div id="conflict-messages"></div>
+                <table class="schedule-table" id="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Lun</th>
+                            <th>Mar</th>
+                            <th>Mié</th>
+                            <th>Jue</th>
+                            <th>Vie</th>
+                            <th>Sáb</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-body">
+                        <!-- Se generará dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+        <script>
+            window.materiasRaw = [
+                <% materias.forEach(materia => { %>
+                { _id: "<%= materia._id %>", nombre: "<%= materia.nombre %>", creditos: "<%= materia.creditos %>", semestre: "<%= materia.semestre %>", horarios: <%- JSON.stringify(materia.horarios) %> },
+                <% }) %>
+            ];
+
+            // Datos del servidor
+            const materiasData = [
+                <% materias.forEach(materia => { %>
+                { data: { id: "<%= materia._id %>", label: "<%= materia.nombre %>" } },
+                <% }) %>
+            ];
+
+            const previasData = [
+                <% previas.forEach(previa => { %>
+            {
+                data: {
+                    id: "<%= previa.materiaBase %>-<%= previa.materiaPrevia %>",
+                    source: "<%= previa.materiaPrevia %>",
+                    target: "<%= previa.materiaBase %>",
+                    tipo: "<%= previa.requisito %>"
+                }
+            },
+                <% }) %>
+            ];
+
+            const historialData = [
+                <% historial.forEach(registro => { %>
+                { usuario: "<%= registro.usuario %>", materia: "<%= registro.materia %>", estado: "<%= registro.estado %>" },
+                <% }) %>
+            ];
+        </script>
+        <script src="/js/grafoMaterias.js"></script>
+        <script src="/js/navbar.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/headerEstudiante.js"></script>
+</body>
+
+</html>

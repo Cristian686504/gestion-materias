@@ -14,23 +14,34 @@ router.get("/register", (req, res) => {
 
   const rol = userInfo?.rol;
   if (token && rol === "Estudiante") {
-     res.redirect("/");
-  } else if(token && rol === "Administrador"){
-      res.redirect("/admin/usuarios");
-  } else{
-      res.render("user/userRegister");
+    res.redirect("/estudiante/materias");
+  } else if (token && rol === "Administrador") {
+    res.redirect("/admin/usuarios");
+  } else {
+    res.render("user/userRegister");
   }
 })
 
 router.get("/login", (req, res) => {
   const token = req.cookies?.token;
-  if (token) {
-     res.redirect("/");
-  } 
-    else{
-        res.render("user/userLogin");
-    }
+  let userInfo;
+  try {
+    userInfo = req.cookies?.userInfo ? JSON.parse(req.cookies.userInfo) : null;
+  } catch (err) {
+    userInfo = null;
+  }
+  const rol = userInfo?.rol;
+  if (token && rol === "Estudiante") {
+    res.redirect("/estudiante/materias");
+  } else if (token && rol === "Administrador") {
+    res.redirect("/admin/usuarios");
+  }
+  else {
+    res.render("user/userLogin");
+  }
 })
+
+router.post("/logout", authController.userLogout);
 
 router.post("/registrarUsuario", userController.registrarUsuario)
 

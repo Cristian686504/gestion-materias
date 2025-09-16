@@ -1,0 +1,55 @@
+<div class="logo-section">
+    <img src="/img/logo.png" alt="Logo" width="60" height="60">
+</div>
+
+<div class="title-section">
+    <h1 class="title">Gestión de materias</h1>
+</div>
+
+<div class="user-section" data-user-id="<%= userAuth.userInfo.id %>">
+    <div class="notification-container">
+        <div class="notification-icon" title="Notificaciones">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+            </svg>
+            <span class="notification-badge" id="notification-badge">0</span>
+        </div>
+        
+        <!-- Panel de notificaciones -->
+        <div class="notification-dropdown" id="notification-dropdown" style="display: none;">
+            <div class="notification-header">
+                <h3>Notificaciones</h3>
+                <button class="clear-all-btn" onclick="clearAllNotifications()">
+                    Limpiar todo
+                </button>
+            </div>
+            <div class="notification-list" id="notification-list">
+                <!-- Las notificaciones se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="user-avatar">
+        <svg viewBox="0 0 24 24">
+            <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+        </svg>
+    </div>
+    <div class="user-info">
+        <div class="user-name">
+            <%= userAuth.userInfo?.username %>
+        </div>
+        <div class="user-role">
+            <%= userAuth.userInfo?.rol %>
+        </div>
+    </div>
+    <form action="/user/logout" method="POST">
+        <button type="submit" class="logout-btn-icon" title="Cerrar sesión">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+            </svg>
+        </button>
+    </form>
+</div>

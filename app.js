@@ -1,12 +1,25 @@
+require('dotenv').config();
 const express = require("express");
-var connectDB = require("./db/connection")
-const app = express();
+var connectDB = require("./db/connection");
 const userRoutes = require("./routes/userRoute");
 const adminRoutes = require("./routes/adminRoute");
+const estudianteRoutes = require("./routes/estudianteRoute");
 const path = require("path");
-const { authenticateToken } = require('./middleware/authenticateUser')
-const cookieParser = require('cookie-parser')
-const PORT = process.env['PORT'] || 5000
+const cookieParser = require('cookie-parser');
+const { verifyToken } = require('./middleware/authMiddleware');
+const http = require("http");
+const { Server } = require("socket.io");
+const { initializeSocketNotifications } = require('./sockets/socketNotificacion');
+const morgan = require("morgan");
+
+
+const app = express();
+const server = http.createServer(app); // Crear servidor HTTP
+const io = new Server(server); // Inicializar Socket.IO
+
+const PORT = process.env.PORT;
+
+app.use(morgan("combined")); //Logs detallados de peticiones
 
 // Middleware para parsear JSON
 app.use(express.json());
@@ -15,46 +28,46 @@ app.use(cookieParser());
 app.use(express.static('./public'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, "views"));
-app.use((req, res, next) => {
-  try {
-    const userInfo = req.cookies?.userInfo ? JSON.parse(req.cookies.userInfo) : null;
-    res.locals.id = userInfo?.id || '';
-    res.locals.username = userInfo?.username || '';
-    res.locals.rol = userInfo?.rol || '';
-  } catch {
-    res.locals.id = '';
-    res.locals.username = '';
-    res.locals.rol = '';
-  }
-  next();
-});;
 
-connectDB()
+// Hacer io accesible globalmente
+app.set('io', io);
 
+// Aplicar el middleware de verificación de token globalmente
+app.use(verifyToken);
 
-// Ruta del dashboard (protegida)
-app.get('/', (req, res) => {
-  const token = req.cookies?.token;
-  let userInfo;
-  try {
-    userInfo = req.cookies?.userInfo ? JSON.parse(req.cookies.userInfo) : null;
-  } catch (err) {
-    userInfo = null;
-  }
-  const rol = userInfo?.rol;
-  if (token && rol === "Estudiante") {
-     res.render("index");
-  } else if(token && rol === "Administrador") {
-    res.redirect('/admin/usuarios');
-  } else {
-    res.redirect('/user/login');
-  }
-});
+connectDB();
 
 // Usar rutas con prefijos
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
-// Puerto (Replit usa process.env.PORT)
-app.listen(5000, '0.0.0.0', () => {
-  console.log(`Servidor corriendo en http://0.0.0.0:5000`);
+app.use("/estudiante", estudianteRoutes);
+
+// Inicializar Socket.IO y obtener funciones de notificación
+const socketNotifications = initializeSocketNotifications(io);
+
+// Hacer las funciones de notificación accesibles globalmente
+global.sendNotificationToStudents = socketNotifications.sendNotificationToStudents;
+global.sendNotificationToUser = socketNotifications.sendNotificationToUser;
+global.getConnectedUsers = socketNotifications.getConnectedUsers;
+global.isUserConnected = socketNotifications.isUserConnected;
+
+app.use(/.*/, (req, res) => {
+    const { isAuthenticated, rol } = req.userAuth;
+    
+    if (isAuthenticated) {
+        if (rol === "Estudiante") {
+            res.redirect('/estudiante/materias');
+        } else if (rol === "Administrador") {
+            res.redirect('/admin/usuarios');
+        } else {
+            res.redirect('/user/login');
+        }
+    } else {
+        res.redirect('/user/login');
+    }
+});
+
+// Usar server.listen en lugar de app.listen
+server.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

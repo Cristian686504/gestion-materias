@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Historial Académico</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.css">
+    <link rel="stylesheet" href="/css/estudianteHistorial.css">
+    <link rel="stylesheet" href="/css/headerEstudiante.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+</head>
+
+<body>
+    <div class="layout">
+        <!-- Header -->
+        <header class="header">
+            <%- include('../layouts/headerEstudiante') %>
+        </header>
+
+        <div class="navbar-container">
+            <%- include('../layouts/navbar') %>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="main-container">
+            <div class="page-header">
+                <h1>Mi Historial Académico</h1>
+                <p class="subtitle">Gestiona tu historial de materias de forma manual o automática</p>
+            </div>
+
+            <!-- Opciones de Carga -->
+            <div class="upload-options">
+                <div class="option-card">
+                    <div class="option-icon manual">📝</div>
+                    <h3>Gestión Manual</h3>
+                    <p>Agrega, edita o elimina materias individualmente</p>
+                    <button id="toggleManualForm" class="btn btn-primary">Gestionar Manualmente</button>
+                </div>
+            </div>
+
+            <!-- Formulario Manual -->
+            <div id="manualForm" class="form-section hidden">
+                <div class="form-header">
+                    <h2>Agregar Nueva Materia</h2>
+                    <button id="closeManualForm" class="close-btn">&times;</button>
+                </div>
+
+                <form id="materiaForm" class="materia-form">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="materia">Materia</label>
+                            <select id="materia" name="materia" required>
+                                <option value="">Seleccionar materia...</option>
+                                <% materias.forEach(materia=> { %>
+                                    <option value="<%= materia._id %>">
+                                        <%= materia.nombre %> (<%= materia.semestre || '-' %>)
+                                    </option>
+                                    <% }); %>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="estado">Estado</label>
+                            <select id="estado" name="estado" required>
+                                <option value="">Seleccionar estado...</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en_curso">En Curso</option>
+                                <option value="aprobada">Curso Aprobado</option>
+                                <option value="examen">Examen Pendiente</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" id="cancelForm" class="btn btn-cancel">Cancelar</button>
+                        <button type="submit" class="btn btn-success">
+                            <span id="submitText">Agregar Materia</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lista del Historial -->
+            <div class="historial-section">
+                <div class="section-header">
+                    <h2>Mi Historial</h2>
+                    <span class="creditos-totales">Tienes <%= totalCreditos %> créditos</span>
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" />
+                            <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Buscar materias...">
+                        <button id="clearSearch" class="clear-search hidden">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="historialTable" class="table-container">
+                    <% if (typeof historial !=='undefined' && historial.length> 0) { %>
+                        <table class="historial-table">
+                            <thead>
+                                <tr>
+                                    <th>Materia</th>
+                                    <th>Créditos</th>
+                                    <th>Semestre</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historialBody">
+                                <% historial.forEach(item=> { %>
+                                    <tr data-id="<%= item.id || '' %>">
+                                        <td>
+                                            <%= item.materia.nombre %>
+                                        </td>
+                                        <td>
+                                            <%= item.materia.creditos || '-' %>
+                                        </td>
+                                        <td>
+                                            <%= item.materia.semestre || '-' %>
+                                        </td>
+                                        <td>
+                                            <span class="estado <%= item.estado.toLowerCase().replace(' ', '_') %>">
+                                                <%= item.estado.replace('_', ' ' ) %>
+                                            </span>
+                                        </td>
+                                        <td class="actions">
+                                            <button class="btn btn-sm"
+                                                onclick="showEditHistorialModal('<%= item._id %>')">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path
+                                                        d="M18.5 2.5C18.8978 2.10217 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10217 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10217 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                            </button>
+                                            <button class="btn btn-secondary btn-sm"
+                                                onclick="showDeleteConfirmModal('<%= item._id %>','<%= item.materia.nombre %>')">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <polyline points="3,6 5,6 21,6" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path
+                                                        d="M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6"
+                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                            </tbody>
+                        </table>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <div class="empty-icon">📚</div>
+                                <h3>No hay materias registradas</h3>
+                                <p>Comienza agregando materias manualmente o sube tu historial en PDF</p>
+                            </div>
+                            <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Procesando...</p>
+        </div>
+    </div>
+
+    <div id="editHistorialModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Editar Historial</h2>
+                <button class="modal-close" onclick="closeEditHistorialModal()">&times;</button>
+            </div>
+            <form id="editHistorialForm">
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="edit_estado">Estado</label>
+                            <select id="edit_estado" name="edit_estado" required>
+                                <option value="">Seleccionar estado...</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en_curso">En Curso</option>
+                                <option value="aprobada">Curso Aprobado</option>
+                                <option value="examen">Examen Pendiente</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditHistorialModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success" id="editHistorialSubmitBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Actualizar Historial
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Confirmar Eliminación -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal confirmation-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirmar Eliminación</h2>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="confirmation-text">
+                    ¿Está seguro de que desea eliminar el historial
+                    <span class="confirmation-historial" id="deleteHistorialName"></span>?
+                </p>
+                <p class="confirmation-text confirmation-text-secondary">
+                    Esta acción no se puede deshacer.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="closeDeleteModal()">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-secondary" id="confirmDeleteBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path
+                            d="M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Eliminar Historial
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.js"></script>
+    <script src="/js/estudianteHistorial.js"></script>
+    <script data-user-id="<%= userAuth.userInfo?.id %>"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/headerEstudiante.js"></script>
+</body>
+
+</html>

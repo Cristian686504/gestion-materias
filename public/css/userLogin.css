@@ -33,9 +33,8 @@ body {
     position: absolute;
     width: 40px; /* ajusta al tamaño de la imagen */
     height: 40px; /* ajusta al tamaño de la imagen */
-    opacity: 0.8; /* opcional, puedes modificar */
+    opacity: 0.8;
     animation: floatLogo 8s ease-in-out infinite;
-    /* Si quieres que rote con la animación, deja transform en keyframes */
 }
 
 .logo-1 {

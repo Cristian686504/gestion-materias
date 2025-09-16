@@ -1,16 +1,15 @@
 const mongoose = require('mongoose');
 
-//-----   User Model   -----//
 const cursaSchema = new mongoose.Schema({
-    idUser:{
-        type: Number,
-        required: true
-    },    
-    idMateria:{
-        type: Number,
-        required: true
+    usuario: {   
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
     },   
-    Estado: {
+    materia: {   
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'materia'
+    },  
+    estado: {
         type: String,
         required:true
     }

@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const User = require("../model/User");
-const { generateToken } = require('../middleware/authenticateUser');
+const { generateToken } = require('../middleware/authMiddleware');
 
 const userAuth = async function (req, res) {
     try {
@@ -14,7 +14,7 @@ const userAuth = async function (req, res) {
                 rol: userData.rol
             });
 
-            // Guardar token en cookie (opcional)
+            // Guardar token en cookie
             res.cookie('token', token, { 
                 httpOnly: true, 
                 secure: process.env.NODE_ENV === 'production',
@@ -33,19 +33,26 @@ const userAuth = async function (req, res) {
 
             // Responder con JSON indicando éxito
             delete userData.password;
+            if(userData.rol === "Estudiante"){
             res.json({
                 success: true,
                 message: "Inicio de sesión exitoso",
-                redirectTo: "/" // URL a donde redireccionar
+                redirectTo: "/estudiante/materias"
             });
+            } else if(userData.rol === "Administrador"){
+                res.json({
+                    success: true,
+                    message: "Inicio de sesión exitoso",
+                    redirectTo: "/admin/usuarios"
+                });
+            }
         }
     } catch (err) {
         console.log("Error en userAuth:", err);
 
-        // Responder con JSON indicando error
         res.json({
             success: false,
-            error: err // El mensaje de error que viene de userLoginAuthenticate
+            error: err
         });
     }
 };
@@ -78,17 +85,11 @@ const userLoginAuthenticate = (body) => {
     });
 };
 
-// Admin logout
 const userLogout = function (req, res) {
-    req.session.destroy((err) => {
-        if (err) {
-            console.log("Error al cerrar sesión:", err);
-        }
         // Limpiar cookies
         res.clearCookie('token');
         res.clearCookie('userInfo');
-        res.redirect("/login");
-    });
+        res.redirect("/user/login");
 };
 
 module.exports = {
