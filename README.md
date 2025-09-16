@@ -13,8 +13,8 @@ Sistema web para la gestión de materias universitarias con funcionalidades para
 
 1. **Clonar el repositorio**
    ```bash
-   git clone <url-del-repositorio>
-   cd sistema-gestion-academica
+   git clone https://github.com/Cristian686504/gestion-materias.git
+   cd gestion-materias
    ```
 
 2. **Instalar dependencias**
