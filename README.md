@@ -27,7 +27,7 @@ Sistema web para la gestión de materias universitarias con funcionalidades para
    Crear un archivo `.env` en la raíz del proyecto:
    ```env
    PORT=3000
-   MONGODB_URI=mongodb://localhost:27017/sistema_academico
+   MONGO_URI=mongodb://localhost:27017/sistema_academico
    JWT_SECRET=tu_clave_secreta_jwt
    NODE_ENV=development
    ```
